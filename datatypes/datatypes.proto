@@ -1,7 +1,6 @@
 syntax = 'proto3';
-option go_package = "github.com/Apurer/e2eechat/datatypes";
 
-package e2eechat;
+package datatypes;
 
 message Payload {
     uint64 sender_id = 1;
