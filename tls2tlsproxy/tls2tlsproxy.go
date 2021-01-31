@@ -20,9 +20,9 @@ var (
 		},
 	}
 
-	messagePool = sync.Pool{
+	authPool = sync.Pool{
 		New: func() interface{} {
-			 return new(message.Message)
+			 return new(dispatch.Authentication)
 		},
 	}
 )
@@ -81,8 +81,10 @@ func proxyConn(conn net.Conn) {
 		return
 	}
 	if n > 0 {
-		auth := datatypes.Authentication{}
+		//auth := dispatch.Authentication{}
+		auth := authPool.Get().(*dispatch.Authentication)
 		err = proto.Unmarshal(buf[:n], &auth) // first check authorization - based on that it will decide whetever it should pass it forward or drop the connection
+		authPool.Put(auth)
 		// not sure if it should validate within proxy or from main server - maybe here it should only validate object and thats about it on proxy side
 		// need to limit database connections 
 		// if user fails to authenticate just remove iptable rule allowing for connection to proxy 
@@ -91,7 +93,7 @@ func proxyConn(conn net.Conn) {
 			log.Printf("handleConnection end: %s\n", conn.RemoteAddr())
 			return
 		}
-		//log.Printf("first message: %s, timestamp: %v", messagePb.Text, messagePb.Timestamp)
+		log.Printf("first message: %s, timestamp: %v", messagePb.Text, messagePb.Timestamp)
 	}
 
 	rAddr, err := net.ResolveTCPAddr("tcp", remoteAddr)
@@ -129,14 +131,6 @@ func chanFromConnServer(conn net.Conn) chan []byte {
 			n, err := conn.Read(buf)
 			if n > 0 {
 				res := make([]byte, n)
-				//messagePb := message.Message{}
-				// err = proto.Unmarshal(buf[:n], &message.Message{})
-				// if err != nil {
-				// 	conn.Close()
-				// 	//log.Print("breaking")
-				// 	break
-				// }
-				//log.Printf("intercepted message: %s, timestamp: %v", messagePb.Text, messagePb.Timestamp)
 				// Copy the buffer so it doesn't get changed while read by the recipient.
 				copy(res, buf[:n])
 				c <- res
@@ -163,16 +157,16 @@ func chanFromConnClient(conn net.Conn) chan []byte {
 			n, err := conn.Read(buf)
 			if n > 0 {
 				res := make([]byte, n)
-				messagePb := message.Message{}
+				//messagePb := message.Message{}
 				//err = proto.Unmarshal(buf[:n], &message.Message{})
-				err = proto.Unmarshal(buf[:n], &messagePb)
+				//err = proto.Unmarshal(buf[:n], &messagePb)
 				if err != nil {
 					//conn.Close()
 					c <- nil
 					//log.Print("breaking")
 					break
 				}
-				log.Printf("intercepted message: %s, timestamp: %v", messagePb.Text, messagePb.Timestamp)
+				//log.Printf("intercepted message: %s, timestamp: %v", messagePb.Text, messagePb.Timestamp)
 				// Copy the buffer so it doesn't get changed while read by the recipient.
 				copy(res, buf[:n])
 				c <- res
