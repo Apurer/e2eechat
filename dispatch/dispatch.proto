@@ -1,5 +1,5 @@
 syntax = 'proto3';
-option go_package = "github.com/Apurer/e2eechat/dispatch";
+option go_package = "github.com/apurer/e2eechat/dispatch";
 
 package dispatch;
 
