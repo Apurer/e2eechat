@@ -1,3 +1,6 @@
+github.com/apurer/e2eechat v0.0.0-20210130220725-1ef183d02109 h1:O/NGD9AwDI2QJFFnGEv84JMKXAocnx51e04bjlaxaZE=
+github.com/apurer/e2eechat/datatypes v0.0.0-20210130220725-1ef183d02109 h1:Oc8146LCE/Q4+PBhbFzSz0MRzDUSWUt8mzGEZU4vwlw=
+github.com/apurer/e2eechat/datatypes v0.0.0-20210130220725-1ef183d02109/go.mod h1:RIrM7Ob84Nu/+fvcvatP1WHBezyR2hAzQ0QgLmXXzHM=
 github.com/golang/protobuf v1.4.0-rc.1/go.mod h1:ceaxUfeHdC40wWswd/P6IGgMaK3YpKi5j83Wpe3EHw8=
 github.com/golang/protobuf v1.4.0-rc.1.0.20200221234624-67d41d38c208/go.mod h1:xKAWHe0F5eneWXFV3EuXVDTCmh+JuBKY0li0aMyXATA=
 github.com/golang/protobuf v1.4.0-rc.2/go.mod h1:LlEzMj4AhA7rCAGe4KMBDvJI+AwstrUpVNzEA03Pprs=
