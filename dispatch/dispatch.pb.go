@@ -303,6 +303,69 @@ func (x *Authentication) GetHash() []byte {
 	return nil
 }
 
+type Rule struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Ip     string `protobuf:"bytes,1,opt,name=ip,proto3" json:"ip,omitempty"`
+	Port   string `protobuf:"bytes,2,opt,name=port,proto3" json:"port,omitempty"`
+	Insert bool   `protobuf:"varint,3,opt,name=insert,proto3" json:"insert,omitempty"`
+}
+
+func (x *Rule) Reset() {
+	*x = Rule{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_dispatch_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Rule) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Rule) ProtoMessage() {}
+
+func (x *Rule) ProtoReflect() protoreflect.Message {
+	mi := &file_dispatch_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Rule.ProtoReflect.Descriptor instead.
+func (*Rule) Descriptor() ([]byte, []int) {
+	return file_dispatch_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *Rule) GetIp() string {
+	if x != nil {
+		return x.Ip
+	}
+	return ""
+}
+
+func (x *Rule) GetPort() string {
+	if x != nil {
+		return x.Port
+	}
+	return ""
+}
+
+func (x *Rule) GetInsert() bool {
+	if x != nil {
+		return x.Insert
+	}
+	return false
+}
+
 var File_dispatch_proto protoreflect.FileDescriptor
 
 var file_dispatch_proto_rawDesc = []byte{
@@ -338,10 +401,14 @@ var file_dispatch_proto_rawDesc = []byte{
 	0x63, 0x6f, 0x64, 0x65, 0x12, 0x1c, 0x0a, 0x09, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x6b, 0x65,
 	0x79, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x09, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x6b,
 	0x65, 0x79, 0x12, 0x12, 0x0a, 0x04, 0x68, 0x61, 0x73, 0x68, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0c,
-	0x52, 0x04, 0x68, 0x61, 0x73, 0x68, 0x42, 0x25, 0x5a, 0x23, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62,
-	0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x61, 0x70, 0x75, 0x72, 0x65, 0x72, 0x2f, 0x65, 0x32, 0x65, 0x65,
-	0x63, 0x68, 0x61, 0x74, 0x2f, 0x64, 0x69, 0x73, 0x70, 0x61, 0x74, 0x63, 0x68, 0x62, 0x06, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x52, 0x04, 0x68, 0x61, 0x73, 0x68, 0x22, 0x42, 0x0a, 0x04, 0x52, 0x75, 0x6c, 0x65, 0x12, 0x0e,
+	0x0a, 0x02, 0x69, 0x70, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x70, 0x12, 0x12,
+	0x0a, 0x04, 0x70, 0x6f, 0x72, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x70, 0x6f,
+	0x72, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x69, 0x6e, 0x73, 0x65, 0x72, 0x74, 0x18, 0x03, 0x20, 0x01,
+	0x28, 0x08, 0x52, 0x06, 0x69, 0x6e, 0x73, 0x65, 0x72, 0x74, 0x42, 0x25, 0x5a, 0x23, 0x67, 0x69,
+	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x61, 0x70, 0x75, 0x72, 0x65, 0x72, 0x2f,
+	0x65, 0x32, 0x65, 0x65, 0x63, 0x68, 0x61, 0x74, 0x2f, 0x64, 0x69, 0x73, 0x70, 0x61, 0x74, 0x63,
+	0x68, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -357,12 +424,13 @@ func file_dispatch_proto_rawDescGZIP() []byte {
 }
 
 var file_dispatch_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_dispatch_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_dispatch_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_dispatch_proto_goTypes = []interface{}{
 	(Action_ActionType)(0), // 0: dispatch.Action.ActionType
 	(*Payload)(nil),        // 1: dispatch.Payload
 	(*Action)(nil),         // 2: dispatch.Action
 	(*Authentication)(nil), // 3: dispatch.Authentication
+	(*Rule)(nil),           // 4: dispatch.Rule
 }
 var file_dispatch_proto_depIdxs = []int32{
 	0, // 0: dispatch.Action.type:type_name -> dispatch.Action.ActionType
@@ -415,6 +483,18 @@ func file_dispatch_proto_init() {
 				return nil
 			}
 		}
+		file_dispatch_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Rule); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -422,7 +502,7 @@ func file_dispatch_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_dispatch_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   3,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

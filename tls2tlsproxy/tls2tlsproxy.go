@@ -117,7 +117,7 @@ func proxyConn(conn net.Conn) {
 	log.Printf("handleConnection end: %s\n", conn.RemoteAddr())
 }
 
-func chanFromConnServer(conn net.Conn) chan []byte {
+func chanFromConn(conn net.Conn) chan []byte {
 	c := make(chan []byte)
 
 	go func() {
@@ -126,44 +126,15 @@ func chanFromConnServer(conn net.Conn) chan []byte {
 
 		for {
 			n, err := conn.Read(buf)
+			if err != nil {
+				c <- nil
+				break
+			}
 			if n > 0 {
 				res := make([]byte, n)
 				// Copy the buffer so it doesn't get changed while read by the recipient.
 				copy(res, buf[:n])
 				c <- res
-			}
-			if err != nil {
-				c <- nil
-				break
-			}
-		}
-	}()
-
-	return c
-}
-
-func chanFromConnClient(conn net.Conn) chan []byte {
-	c := make(chan []byte)
-
-	go func() {
-		buf := getBuffer()
-		defer releaseBuffer(buf)
-
-		for {
-			n, err := conn.Read(buf)
-			if n > 0 {
-				res := make([]byte, n)
-				if err != nil {
-					c <- nil
-					break
-				}
-				// Copy the buffer so it doesn't get changed while read by the recipient.
-				copy(res, buf[:n])
-				c <- res
-			}
-			if err != nil {
-				c <- nil
-				break
 			}
 		}
 	}()
@@ -172,8 +143,8 @@ func chanFromConnClient(conn net.Conn) chan []byte {
 }
 
 func pipe(conn1 net.Conn, conn2 net.Conn) {
-	chan1 := chanFromConnClient(conn1)
-	chan2 := chanFromConnServer(conn2)
+	chan1 := chanFromConn(conn1)
+	chan2 := chanFromConn(conn2)
 
 	for {
 		select {

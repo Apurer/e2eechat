@@ -31,3 +31,14 @@ message Authentication {
     bytes publickey = 3; 
     bytes hash = 4;
 }
+
+// Not sure how sending over rules will look like yet
+// To add verification of the sent message rule or keep it simple
+// If iptables rules will set correctly its not really needed
+// Most likely it will stay this way
+
+message Rule {
+    string ip = 1;
+    string port = 2;
+    bool insert = 3;
+}
