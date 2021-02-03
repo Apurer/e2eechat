@@ -16,7 +16,7 @@ type localAddr struct {
 var lclAddr localAddr
 
 func (l *localAddr) redirect(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, fmt.Sprintf("https://%s:%s", l.domain, l.port), http.StatusMovedPermanently)
+	http.Redirect(w, r, fmt.Sprintf("https://%s:%s%s", l.domain, l.port, r.RequestURI), http.StatusMovedPermanently)
 }
 
 func init() {
