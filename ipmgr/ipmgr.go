@@ -105,42 +105,7 @@ func main() {
 	defer remConnSrvTLS.Close()
 	defer remConnSrvHTTPS.Close()
 
-	buf := getBuffer()
-	defer releaseBuffer(buf)
-
-	for {
-		n, err := remConnSrvHTTPS.Read(buf)
-
-		if err != nil {
-			break
-		}
-		if n > 0 {
-			rule := rulePool.Get().(*dispatch.Rule)
-			err = proto.Unmarshal(buf[:n], rule)
-			if err != nil {
-				break
-			}
-			ipexc.Insert(rule.Port, rule.Ip)
-			rulePool.Put(rule)
-		}
-	}
-
-	for {
-		n, err := remConnSrvTLS.Read(buf)
-
-		if err != nil {
-			break
-		}
-		if n > 0 {
-			rule := rulePool.Get().(*dispatch.Rule)
-			err = proto.Unmarshal(buf[:n], rule)
-			if err != nil {
-				break
-			}
-			ipexc.Delete(rule.Port, rule.Ip)
-			rulePool.Put(rule)
-		}
-	}
+	manage(remConnSrvTLS, remConnSrvHTTPS)
 }
 
 func manage(remConnSrvTLS net.Conn, remConnSrvHTTPS net.Conn) {
@@ -149,16 +114,34 @@ func manage(remConnSrvTLS net.Conn, remConnSrvHTTPS net.Conn) {
 
 	for {
 		select {
-		case insertRule := <-insertChan:
+		case b1 := <-insertChan:
+			if b1 == nil {
+				return
+			}
+			insertRule := rulePool.Get().(*dispatch.Rule)
+			defer rulePool.Put(insertRule)
+			err := proto.Unmarshal(b1, insertRule)
+			if err != nil {
+				return
+			}
 			ipexc.Insert(insertRule.Port, insertRule.Ip)
-		case deleteRule := <-deleteChan:
+		case b2 := <-deleteChan:
+			if b2 == nil {
+				return
+			}
+			deleteRule := rulePool.Get().(*dispatch.Rule)
+			defer rulePool.Put(deleteRule)
+			err := proto.Unmarshal(b2, deleteRule)
+			if err != nil {
+				return
+			}
 			ipexc.Delete(deleteRule.Port, deleteRule.Ip)
 		}
 	}
 }
 
-func chanFromConn(conn net.Conn) chan *dispatch.Rule {
-	c := make(chan *dispatch.Rule)
+func chanFromConn(conn net.Conn) chan []byte {
+	c := make(chan []byte)
 
 	go func() {
 		buf := getBuffer()
@@ -171,15 +154,10 @@ func chanFromConn(conn net.Conn) chan *dispatch.Rule {
 				break
 			}
 			if n > 0 {
-				rule := rulePool.Get().(*dispatch.Rule)
-				err = proto.Unmarshal(buf[:n], rule)
-
-				if err != nil {
-					break
-				}
-
-				c <- rule
-				rulePool.Put(rule)
+				res := make([]byte, n)
+				// Copy the buffer so it doesn't get changed while read by the recipient.
+				copy(res, buf[:n])
+				c <- res
 			}
 		}
 	}()
