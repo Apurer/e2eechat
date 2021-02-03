@@ -109,12 +109,12 @@ func main() {
 }
 
 func manage(remConnSrvTLS net.Conn, remConnSrvHTTPS net.Conn) {
-	insertChan := chanFromConn(remConnSrvTLS)
-	deleteChan := chanFromConn(remConnSrvHTTPS)
+	insertRuleChan := chanFromConn(remConnSrvTLS)
+	deleteRuleChan := chanFromConn(remConnSrvHTTPS)
 
 	for {
 		select {
-		case b1 := <-insertChan:
+		case b1 := <-insertRuleChan:
 			if b1 == nil {
 				return
 			}
@@ -125,7 +125,7 @@ func manage(remConnSrvTLS net.Conn, remConnSrvHTTPS net.Conn) {
 				return
 			}
 			ipexc.Insert(insertRule.Port, insertRule.Ip)
-		case b2 := <-deleteChan:
+		case b2 := <-deleteRuleChan:
 			if b2 == nil {
 				return
 			}
