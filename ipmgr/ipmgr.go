@@ -73,30 +73,37 @@ func init() {
 	remAddrSrvHTTPS.domain = domain
 }
 
+func (remAddr remoteAddr) resolveTCPAddrAndConnect(conf *tls.Config) (*tls.Conn, error) {
+
+	remTCPAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%s", remAddr.domain, remAddr.port))
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	remConn, err := tls.Dial("tcp", remTCPAddr.String(), conf)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	return remConn, nil
+}
+
 func main() {
-
-	remTCPAddrSrvHTTPS, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%s", remAddrSrvHTTPS.domain, remAddrSrvHTTPS.port))
-	if err != nil {
-		log.Print(err)
-	}
-
-	// connects via tls and receives incoming requests to modify iptables rules
-	remTCPAddrSrvTLS, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%s", remAddrSrvTLS.domain, remAddrSrvTLS.port))
-	if err != nil {
-		log.Print(err)
-	}
 
 	conf := &tls.Config{
 		InsecureSkipVerify: true,
 	}
 
-	remConnSrvTLS, err := tls.Dial("tcp", remTCPAddrSrvTLS.String(), conf)
+	remConnSrvHTTPS, err := remAddrSrvHTTPS.resolveTCPAddrAndConnect(conf)
 	if err != nil {
 		log.Print(err)
 		return
 	}
 
-	remConnSrvHTTPS, err := tls.Dial("tcp", remTCPAddrSrvHTTPS.String(), conf)
+	// connects via tls and receives incoming requests to modify iptables rules
+	remConnSrvTLS, err := remAddrSrvTLS.resolveTCPAddrAndConnect(conf)
 	if err != nil {
 		log.Print(err)
 		return
