@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/apurer/eev"
+	"github.com/Apurer/eev"
 )
 
 type localAddr struct {
@@ -24,12 +24,12 @@ func init() {
 	privkey := flag.String("key", "", "private key for dencryption of environment variable")
 	flag.Parse()
 
-	port, err := eev.Get("HTTPS_SERVER_PORT", privkey)
+	port, err := eev.Get("HTTPS_SERVER_PORT", []byte(*privkey))
 	if err != nil {
 		panic(err)
 	}
 
-	domain, err := eev.Get("HTTPS_SERVER_DOMAIN", privkey)
+	domain, err := eev.Get("HTTPS_SERVER_DOMAIN", []byte(*privkey))
 	if err != nil {
 		panic(err)
 	}

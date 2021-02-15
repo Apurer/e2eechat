@@ -9,9 +9,9 @@ import (
 	"crypto/tls"
 	"sync"
 
-	"github.com/apurer/e2eechat/dispatch"
-	"github.com/apurer/eev"
-	"github.com/apurer/ipexc"
+	"github.com/Apurer/e2eechat/dispatch"
+	"github.com/Apurer/eev"
+	"github.com/Apurer/ipexc"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -46,12 +46,12 @@ func init() {
 	privkey := flag.String("key", "", "private key for dencryption of environment variable")
 	flag.Parse()
 
-	port, err := eev.Get("TLS_SERVER_PORT", privkey)
+	port, err := eev.Get("TLS_SERVER_PORT", []byte(*privkey))
 	if err != nil {
 		panic(err)
 	}
 
-	domain, err := eev.Get("TLS_SERVER_DOMAIN", privkey)
+	domain, err := eev.Get("TLS_SERVER_DOMAIN", []byte(*privkey))
 	if err != nil {
 		panic(err)
 	}
@@ -59,12 +59,12 @@ func init() {
 	remAddrSrvTLS.port = port
 	remAddrSrvTLS.domain = domain
 
-	port, err = eev.Get("HTTPS_SERVER_PORT", privkey)
+	port, err = eev.Get("HTTPS_SERVER_PORT", []byte(*privkey))
 	if err != nil {
 		panic(err)
 	}
 
-	domain, err = eev.Get("HTTPS_SERVER_DOMAIN", privkey)
+	domain, err = eev.Get("HTTPS_SERVER_DOMAIN", []byte(*privkey))
 	if err != nil {
 		panic(err)
 	}
@@ -73,7 +73,7 @@ func init() {
 	remAddrSrvHTTPS.domain = domain
 }
 
-func (remAddr remoteAddr) resolveTCPAddrAndConnect(conf *tls.Config) (*tls.Conn, error) {
+func (remAddr *remoteAddr) resolveTCPAddrAndConnect(conf *tls.Config) (*tls.Conn, error) {
 
 	remTCPAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%s", remAddr.domain, remAddr.port))
 	if err != nil {
