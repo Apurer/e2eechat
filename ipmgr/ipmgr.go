@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 
 	"crypto/tls"
 	"sync"
 
 	"github.com/Apurer/e2eechat/dispatch"
 	"github.com/Apurer/eev"
+	"github.com/Apurer/eev/privatekey"
 	"github.com/Apurer/ipexc"
 	"google.golang.org/protobuf/proto"
 )
@@ -43,15 +45,28 @@ var (
 
 func init() {
 
-	privkey := flag.String("key", "", "private key for dencryption of environment variable")
-	flag.Parse()
-
-	port, err := eev.Get("TLS_SERVER_PORT", []byte(*privkey))
+	keypath := os.Getenv("KEYPATH")
+	err := os.Unsetenv("KEYPATH")
+	if err != nil {
+		panic(err)
+	}
+	passphrase := os.Getenv("PASSPHRASE")
+	err = os.Unsetenv("PASSPHRASE")
 	if err != nil {
 		panic(err)
 	}
 
-	domain, err := eev.Get("TLS_SERVER_DOMAIN", []byte(*privkey))
+	privkey, err := privatekey.Read(keypath, passphrase)
+	if err != nil {
+		panic(err)
+	}
+
+	port, err := eev.Get("TLS_SERVER_PORT", privkey)
+	if err != nil {
+		panic(err)
+	}
+
+	domain, err := eev.Get("TLS_SERVER_DOMAIN", privkey)
 	if err != nil {
 		panic(err)
 	}
@@ -59,12 +74,12 @@ func init() {
 	remAddrSrvTLS.port = port
 	remAddrSrvTLS.domain = domain
 
-	port, err = eev.Get("HTTPS_SERVER_PORT", []byte(*privkey))
+	port, err = eev.Get("HTTPS_SERVER_PORT", privkey)
 	if err != nil {
 		panic(err)
 	}
 
-	domain, err = eev.Get("HTTPS_SERVER_DOMAIN", []byte(*privkey))
+	domain, err = eev.Get("HTTPS_SERVER_DOMAIN", privkey)
 	if err != nil {
 		panic(err)
 	}
