@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -45,8 +44,8 @@ var (
 
 func init() {
 
-	keypath := os.Getenv("KEYPATH")
-	err := os.Unsetenv("KEYPATH")
+	keypath := os.Getenv("KEY_PATH")
+	err := os.Unsetenv("KEY_PATH")
 	if err != nil {
 		panic(err)
 	}
