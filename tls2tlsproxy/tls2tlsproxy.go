@@ -6,7 +6,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/apurer/e2eechat/dispatch"
+	"github.com/Apurer/e2eechat/dispatch"
 	"github.com/golang/protobuf/proto"
 )
 

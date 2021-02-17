@@ -1,4 +1,8 @@
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
+github.com/Apurer/eev v0.0.0-20200620111458-e910c84d9882 h1:zWcpbG1X5v5brJzADoxOWcw727BDGLqejIcvZZbr3MI=
+github.com/Apurer/eev v0.0.0-20200620111458-e910c84d9882/go.mod h1:Q/VZ6I2j4CjnZi1Jddt+5P7Ukh+tzn2CDYWgF6Fb6Gw=
+github.com/Apurer/ipexc v0.0.0-20210215190953-6244af4ace84 h1:UFkvOe15smi9Lj4S10ZVbbhQA651fcRADCpPeYMaOjo=
+github.com/Apurer/ipexc v0.0.0-20210215190953-6244af4ace84/go.mod h1:CGXdIjirPLJ0on9I+NCT/Kac374DL6QHEilHkH/JxU0=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=

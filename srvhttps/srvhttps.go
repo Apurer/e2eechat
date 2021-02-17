@@ -1,11 +1,12 @@
 package main
 
 import (
-	"flag"
+	"os"
 	"fmt"
 	"net/http"
 
-	"github.com/apurer/eev"
+	"github.com/Apurer/eev"
+	"github.com/Apurer/eev/privatekey"
 )
 
 type localAddr struct {
@@ -16,13 +17,26 @@ type localAddr struct {
 var lclAddr localAddr
 
 func (l *localAddr) redirect(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, fmt.Sprintf("https://%s:%s", l.domain, l.port), http.StatusMovedPermanently)
+	http.Redirect(w, r, fmt.Sprintf("https://%s:%s%s", l.domain, l.port, r.RequestURI), http.StatusMovedPermanently)
 }
 
 func init() {
 
-	privkey := flag.String("key", "", "private key for dencryption of environment variable")
-	flag.Parse()
+	keypath := os.Getenv("KEYPATH")
+	err := os.Unsetenv("KEYPATH")
+	if err != nil {
+		panic(err)
+	}
+	passphrase := os.Getenv("PASSPHRASE")
+	err = os.Unsetenv("PASSPHRASE")
+	if err != nil {
+		panic(err)
+	}
+
+	privkey, err := privatekey.Read(keypath, passphrase)
+	if err != nil {
+		panic(err)
+	}
 
 	port, err := eev.Get("HTTPS_SERVER_PORT", privkey)
 	if err != nil {
