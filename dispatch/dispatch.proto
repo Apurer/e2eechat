@@ -4,38 +4,37 @@ option go_package = "github.com/Apurer/e2eechat/dispatch";
 package dispatch;
 
 message Payload {
-    uint64 sender_id = 1;
-    bytes text = 2;
-    bytes image = 3;
-    int64 timestamp = 4;
+    bytes text = 1;
+    int64 timestamp = 2;
 }
 
 message Action {
     enum ActionType {
-        HANDSHAKE = 0;
-        TRANSMISSION = 1;
-        CONFIRMATION = 2;
+        HANDSHAKE = 0; // exchange of public keys between users
+        TRANSMISSION = 1; // when message is being sent
+        CONFIRMATION = 2; // confirmation of sent message sent to user who sent message (from user whos message was for)
     }
     
     bytes payload = 1;
-    uint64 recipient_id = 2;
-    uint64 channel_id = 3;
-    bytes publickey = 4;
-    bytes hash = 5;
-    ActionType type = 6;
+    uint64 sender_id = 2;
+    uint64 recipient_id = 3;
+    uint64 channel_id = 4;
+    bytes publickey = 5; // public key 
+    bytes hash = 6; // hash of full payload
+    ActionType type = 7;
 }
 
 // Sent by user to be validated
 message Authentication {
     uint64 user_id = 1;
-    bytes code = 2;
+    bytes code = 2; // on https user request its empty, on tls request value is filled
     bytes publickey = 3;
-    bytes hash = 4;
+    bytes hash = 4; // hash of public key sent by server from https request
 }
 
 // Server responds with code, hash of clients public key and server public key
 message Authorization {
     bytes code = 1;
     bytes publickey = 2;
-    bytes hash = 3;
+    bytes hash = 3; // hash of public key sent by user
 }
