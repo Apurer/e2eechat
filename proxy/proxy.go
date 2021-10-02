@@ -4,11 +4,23 @@ import (
 	"crypto/tls"
 	"log"
 	"net"
+	"net/http"
+	"net/http/httputil"
+	"os"
 	"sync"
+	"time"
 
 	"github.com/Apurer/e2eechat/dispatch"
 	"github.com/golang/protobuf/proto"
 )
+
+type remote struct {
+	addr string
+}
+
+type handler struct {
+	proxy *httputil.ReverseProxy
+}
 
 const (
 	bufferSize = 32 * 1024
@@ -39,39 +51,99 @@ func releaseBuffer(b []byte) {
 	bufferPool.Put(b)
 }
 
-const localAddr string = ":25500"
-const remoteAddr string = "127.0.0.1:25501"
-
 func main() {
-	log.SetFlags(log.Lshortfile)
 
-	cer, err := tls.LoadX509KeyPair("proxy.crt", "proxy.key")
+	tcpProxyPort, tcpServerPort, http2ProxyPort, http2ServerPort := os.Getenv("TCP_PROXY_PORT"), os.Getenv("TCP_SERVER_PORT"), os.Getenv("HTTP2_PROXY_PORT"), os.Getenv("HTTP2_SERVER_PORT")
+	if tcpProxyPort == "" {
+		log.Fatal("TCP_PROXY_PORT environment variable must be set")
+	}
+	if tcpServerPort == "" {
+		log.Fatal("TCP_SERVER_PORT environment variable must be set")
+	}
+	if http2ProxyPort == "" {
+		log.Fatal("HTTP2_PROXY_PORT environment variable must be set")
+	}
+	if http2ServerPort == "" {
+		log.Fatal("HTTP2_SERVER_PORT environment variable must be set")
+	}
+
+	tcpServerRemote := &remote{
+		addr: ":" + tcpServerPort,
+	}
+
+	http2ServerRemote := &remote{
+		addr: ":" + http2ServerPort,
+	}
+
+	director := func(req *http.Request) {
+		req.URL.Scheme = "https"
+		req.URL.Host = http2ServerRemote.addr
+	}
+
+	reverseProxy := &httputil.ReverseProxy{Director: director}
+	handler := handler{proxy: reverseProxy}
+
+	proxyTLSCert, proxyTLSKey := os.Getenv("PROXY_TLS_CERT"), os.Getenv("PROXY_TLS_KEY")
+	if proxyTLSCert == "" {
+		log.Fatal("PROXY_TLS_CERT environment variable must be set")
+	}
+	if proxyTLSKey == "" {
+		log.Fatal("PROXY_TLS_KEY environment variable must be set")
+	}
+
+	cer, err := tls.LoadX509KeyPair(proxyTLSCert, proxyTLSKey)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
 	config := &tls.Config{Certificates: []tls.Certificate{cer}}
-	ln, err := tls.Listen("tcp", localAddr, config)
+
+	ln, err := tls.Listen("tcp", tcpProxyPort, config)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	defer ln.Close()
 
-	log.Printf("Listening: %v -> %v\n\n", localAddr, remoteAddr)
+	log.Printf("Listening: %v -> %v\n\n", tcpProxyPort, tcpServerPort)
 
-	for {
-		conn, err := ln.Accept()
-		if err != nil {
-			log.Println(err)
-			continue
+	go func() {
+		for {
+			conn, err := ln.Accept()
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			go tcpServerRemote.proxyConn(conn)
 		}
-		go proxyConn(conn)
+	}()
+
+	srv := &http.Server{
+		Addr:         ":" + http2ProxyPort,
+		Handler:      handler,
+		ReadTimeout:  1 * time.Second,
+		WriteTimeout: 1 * time.Second,
+		TLSConfig:    config,
+	}
+
+	log.Fatal(srv.ListenAndServe())
+}
+
+func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "POST","GET":
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-Frame-Options", "DENY")
+		w.Header().Del("X-Forwarded-For")
+
+		h.proxy.ServeHTTP(w, r)
+	default:
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
-func proxyConn(conn net.Conn) {
+func (r *remote) proxyConn(conn net.Conn) {
 	defer conn.Close()
 
 	buf := getBuffer()
@@ -95,7 +167,7 @@ func proxyConn(conn net.Conn) {
 		}
 	}
 
-	rAddr, err := net.ResolveTCPAddr("tcp", remoteAddr)
+	rAddr, err := net.ResolveTCPAddr("tcp", r.addr)
 	if err != nil {
 		log.Print(err)
 	}

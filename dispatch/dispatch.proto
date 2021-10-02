@@ -6,8 +6,7 @@ package dispatch;
 message Payload {
     uint64 sender_id = 1;
     bytes text = 2;
-    bytes image = 3;
-    int64 timestamp = 4;
+    int64 timestamp = 3;
 }
 
 message Action {
@@ -30,15 +29,4 @@ message Authentication {
     bytes code = 2; 
     bytes publickey = 3; 
     bytes hash = 4;
-}
-
-// Not sure how sending over rules will look like yet
-// To add verification of the sent message rule or keep it simple
-// If iptables rules will set correctly its not really needed
-// Most likely it will stay this way
-
-message Rule {
-    string ip = 1;
-    string port = 2;
-    bool insert = 3;
 }
